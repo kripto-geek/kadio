@@ -1,0 +1,173 @@
+/* static/styles.css */
+
+/* Reset styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Body and background */
+body {
+  background: url('my_background.jpg') no-repeat center center fixed;
+  background-size: cover;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #f0f0f0;
+  line-height: 1.6;
+  padding: 10px;
+}
+
+/* Main container */
+.container {
+  max-width: 800px;
+  width: 95%;
+  margin: 40px auto;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.85);
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.7);
+}
+
+/* Header */
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 2.5rem;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+}
+
+/* Section card style */
+.section {
+  margin-bottom: 20px;
+  padding: 15px;
+  border-radius: 8px;
+  background: rgba(30, 30, 30, 0.9);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+/* Section headings */
+.section h3 {
+  margin-bottom: 10px;
+  border-bottom: 1px solid #555;
+  padding-bottom: 5px;
+  font-size: 1.5rem;
+}
+
+/* Button styling */
+button {
+  background: #444;
+  border: none;
+  padding: 10px 20px;
+  margin: 10px 5px;
+  color: #fff;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background 0.3s ease;
+  font-size: 1rem;
+}
+button:hover {
+  background: #666;
+}
+
+/* Hide default audio controls */
+audio {
+  display: none;
+}
+
+/* Form styling */
+form {
+  display: flex;
+  flex-direction: column;
+}
+form input[type="file"] {
+  margin-bottom: 10px;
+  font-size: 1rem;
+}
+form button {
+  align-self: flex-start;
+}
+
+/* Queue list styling */
+#queueList {
+  list-style: none;
+  padding-left: 0;
+}
+#queueList li {
+  padding: 5px 0;
+  border-bottom: 1px solid #555;
+  font-size: 1rem;
+}
+
+/* Chat section styling */
+#chat {
+  height: 150px;
+  overflow-y: auto;
+  border: 1px solid #555;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  margin-bottom: 10px;
+  font-size: 0.9rem;
+}
+#chat p {
+  margin: 5px 0;
+}
+
+/* Chat input row */
+.chat-input-row {
+  display: flex;
+  gap: 10px;
+}
+#chatInput {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #555;
+  border-radius: 5px;
+  background: #222;
+  color: #fff;
+  font-size: 1rem;
+}
+
+/* Skip votes and listener count display */
+#skipVotesDisplay,
+#listenerCount {
+  font-size: 0.9rem;
+  margin-top: 10px;
+}
+
+/* Mobile-specific adjustments */
+@media only screen and (max-width: 600px) {
+  .container {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 20px;
+    border-radius: 0;
+    min-height: 100vh;
+  }
+  h1 {
+    font-size: 2rem;
+    letter-spacing: 2px;
+  }
+  .section {
+    padding: 15px;
+    margin-bottom: 15px;
+  }
+  .section h3 {
+    font-size: 1.3rem;
+  }
+  button {
+    padding: 10px 16px;
+    font-size: 1rem;
+    margin: 10px 5px;
+  }
+  #queueList li,
+  #chat,
+  #chatInput {
+    font-size: 1rem;
+  }
+  #chat {
+    height: 150px;
+  }
+}
+

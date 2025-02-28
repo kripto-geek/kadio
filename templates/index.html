@@ -1,124 +1,84 @@
+<!-- templates/index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Live Radio</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-      line-height: 1.6;
-    }
-    #startButton, #skipButton {
-      padding: 10px 20px;
-      font-size: 16px;
-      margin-bottom: 20px;
-      cursor: pointer;
-    }
-    #player {
-      margin-bottom: 20px;
-    }
-    /* Hide default audio controls to prevent manual pause/skip */
-    audio {
-      display: none;
-    }
-    /* Upload form styling */
-    #upload {
-      margin-bottom: 20px;
-    }
-    /* Queue styling */
-    #queue {
-      margin-bottom: 20px;
-    }
-    #queueList li {
-      margin-bottom: 5px;
-    }
-    /* Chat section styling */
-    #chatSection {
-      margin-bottom: 20px;
-      border: 1px solid #ccc;
-      padding: 10px;
-      max-width: 400px;
-    }
-    #chat {
-      height: 150px;
-      overflow-y: auto;
-      border: 1px solid #ddd;
-      padding: 5px;
-      margin-bottom: 10px;
-    }
-    #listeners {
-      margin-bottom: 20px;
-    }
-    /* Skip votes display styling */
-    #skipVotesDisplay {
-      margin-bottom: 20px;
-      font-style: italic;
-    }
-  </style>
+  <title>Kadio Player</title>
+  <!-- Link external CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-  <h1>Live Radio</h1>
-
-  <!-- Audio Player (backend-controlled playback) -->
-  <div id="player">
-    <audio id="audioPlayer" autoplay></audio>
-    <div id="songInfo"></div>
+  <div class="container">
+    <h1>Kadio Player</h1>
+    
+    <!-- Audio Player Section -->
+    <div id="player" class="section player-section">
+      <audio id="audioPlayer" autoplay></audio>
+      <div id="songInfo">We Lost Track ... </div>
+    </div>
+    
+    <!-- Control Buttons Section -->
+    <div class="section control-section">
+      <button id="startButton">..Listen..</button>
+      <button id="skipButton">Vote to Skip</button>
+      <div id="skipVotesDisplay">Skip votes: 0</div>
+    </div>
+    
+    <!-- Upload Section -->
+    <div id="upload" class="section upload-section">
+      <h3>Upload a Song</h3>
+      <form id="uploadForm" enctype="multipart/form-data">
+        <input type="file" name="song" accept=".mp3" required>
+        <button type="submit">Upload</button>
+      </form>
+      <div id="uploadMessage"></div>
+    </div>
+    
+    <!-- Queue Section -->
+    <div id="queue" class="section queue-section">
+      <h3>Upcoming Plays</h3>
+      <ul id="queueList"></ul>
+    </div>
+    
+    <!-- Chat Section -->
+    <div id="chatSection" class="section chat-section">
+      <h3>Chat</h3>
+      <div id="chat"></div>
+      <div class="chat-input-row">
+        <input type="text" id="chatInput" placeholder="Type a message...">
+        <button id="sendChat">Send</button>
+      </div>
+    </div>
+    
+    <!-- Listeners Section -->
+    <div id="listeners" class="section listeners-section">
+      Active listeners: <span id="listenerCount">0</span>
+    </div>
   </div>
 
-  <!-- Start Radio Button (required to trigger browser audio playback) -->
-  <button id="startButton">Start Radio</button>
-  
-  <!-- Vote to Skip Button -->
-  <button id="skipButton">Vote to Skip</button>
-  
-  <!-- Display for current skip votes -->
-  <div id="skipVotesDisplay">Skip votes: 0</div>
-
-  <!-- Upload Form -->
-  <div id="upload">
-    <h3>Upload a Song</h3>
-    <form id="uploadForm" enctype="multipart/form-data">
-      <input type="file" name="song" accept=".mp3" required>
-      <button type="submit">Upload</button>
-    </form>
-    <div id="uploadMessage"></div>
-  </div>
-
-  <!-- Upcoming Songs Queue -->
-  <div id="queue">
-    <h3>Upcoming Songs</h3>
-    <ul id="queueList"></ul>
-  </div>
-
-  <!-- Chat Section -->
-  <div id="chatSection">
-    <h3>Chat</h3>
-    <div id="chat"></div>
-    <input type="text" id="chatInput" placeholder="Type a message...">
-    <button id="sendChat">Send</button>
-  </div>
-
-  <!-- Active Listeners -->
-  <div id="listeners">
-    Active listeners: <span id="listenerCount">0</span>
-  </div>
-
-  <!-- Include Socket.IO client library -->
+  <!-- Socket.IO and Custom JS -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.1/socket.io.min.js"></script>
   <script>
     const socket = io();
-
-    /* ===== Audio Player & Radio Playback ===== */
+    
+    // DOM Elements
     const audioPlayer = document.getElementById('audioPlayer');
     const songInfo = document.getElementById('songInfo');
     const startButton = document.getElementById('startButton');
     const skipButton = document.getElementById('skipButton');
     const skipVotesDisplay = document.getElementById('skipVotesDisplay');
+    const uploadForm = document.getElementById('uploadForm');
+    const uploadMessage = document.getElementById('uploadMessage');
+    const queueList = document.getElementById('queueList');
+    const chatDiv = document.getElementById('chat');
+    const chatInput = document.getElementById('chatInput');
+    const sendChat = document.getElementById('sendChat');
+    const listenerCount = document.getElementById('listenerCount');
+    
     let started = false;
     let currentSongData = null;
-
-    // Start Radio button: enable audio playback (user gesture required).
+    
+    // Start Radio: user gesture required to allow autoplay.
     startButton.addEventListener('click', () => {
       started = true;
       if (currentSongData) {
@@ -128,18 +88,18 @@
       }
       startButton.style.display = 'none';
     });
-
-    // Vote to Skip: emit vote to the backend.
+    
+    // Vote to Skip button
     skipButton.addEventListener('click', () => {
       socket.emit('vote_skip');
     });
-
-    // Listen for the 'play_song' event from the server.
+    
+    // Receive current song details from server
     socket.on('play_song', data => {
       currentSongData = data;
       songInfo.innerHTML = `<strong>Now Playing:</strong> ${data.metadata.title} by ${data.metadata.artist}`;
       audioPlayer.src = data.url;
-      // Clear skip votes for the new song.
+      // Reset skip votes display on new song
       skipVotesDisplay.innerHTML = 'Skip votes: 0';
       const onMetadata = () => {
         if (data.offset) {
@@ -152,15 +112,13 @@
       };
       audioPlayer.addEventListener('loadedmetadata', onMetadata);
     });
-
-    // When the current song ends, notify the server.
+    
+    // When song ends, notify server
     audioPlayer.addEventListener('ended', () => {
       socket.emit('song_finished');
     });
-
-    /* ===== Upload Form Handling ===== */
-    const uploadForm = document.getElementById('uploadForm');
-    const uploadMessage = document.getElementById('uploadMessage');
+    
+    // Handle song upload
     uploadForm.addEventListener('submit', event => {
       event.preventDefault();
       const formData = new FormData(uploadForm);
@@ -174,9 +132,8 @@
           uploadMessage.textContent = 'Upload failed.';
         });
     });
-
-    /* ===== Queue Updates ===== */
-    const queueList = document.getElementById('queueList');
+    
+    // Update queue display
     socket.on('queue_update', data => {
       queueList.innerHTML = '';
       data.queue.forEach(song => {
@@ -185,18 +142,13 @@
         queueList.appendChild(li);
       });
     });
-
-    /* ===== Active Listener Count ===== */
-    const listenerCount = document.getElementById('listenerCount');
+    
+    // Update active listener count
     socket.on('listener_count', data => {
       listenerCount.textContent = data.count;
     });
-
-    /* ===== Chat Functionality ===== */
-    const chatDiv = document.getElementById('chat');
-    const chatInput = document.getElementById('chatInput');
-    const sendChat = document.getElementById('sendChat');
-
+    
+    // Chat functionality
     sendChat.addEventListener('click', () => {
       const message = chatInput.value.trim();
       if (message) {
@@ -204,15 +156,14 @@
         chatInput.value = '';
       }
     });
-
     socket.on('chat_message', data => {
       const p = document.createElement('p');
       p.textContent = `${data.user || 'Anonymous'}: ${data.message}`;
       chatDiv.appendChild(p);
       chatDiv.scrollTop = chatDiv.scrollHeight;
     });
-
-    /* ===== Skip Votes Updates ===== */
+    
+    // Update skip votes display
     socket.on('skip_votes_update', data => {
       skipVotesDisplay.innerHTML = `Skip votes: ${data.votes} / ${data.total} (Need > 50% to skip)`;
     });
