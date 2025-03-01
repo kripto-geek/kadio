@@ -6,4 +6,4 @@ gevent==23.9.1
 gevent-websocket==0.10.1
 python-dotenv==1.0.1
 mutagen==1.46.0
-
+gunicorn
