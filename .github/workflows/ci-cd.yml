@@ -20,9 +20,6 @@ jobs:
       - name: Install dependencies
         run: pip install --no-cache-dir -r requirements.txt
 
-      - name: Run tests
-        run: pytest  # (Add tests as needed)
-
       - name: Build Docker image
         run: |
           docker build -t krgaurav01/devopsified:${{ github.sha }} .
@@ -37,6 +34,10 @@ jobs:
         run: |
           docker push krgaurav01/devopsified:${{ github.sha }}
 
+      - name: Update Kubernetes manifest
+        run: |
+          sed -i "s|krgaurav01/devopsified:.*|krgaurav01/devopsified:${{ github.sha }}|g" deployment.yaml
+
       - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@master
         with:
@@ -45,4 +46,4 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             docker pull krgaurav01/devopsified:${{ github.sha }}
-            kubectl apply -f /kadio//your/deployment.yaml
+            kubectl apply -f deployment.yaml
