@@ -47,5 +47,15 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            docker pull krgaurav01/devopsified:${{ github.sha }}
-            kubectl apply -f ./deployment.yaml
+            DEPLOY_DIR="/home/ubuntu/kadio"
+            # Clone repo if it doesn't exist, else pull the latest changes
+            if [ ! -d "$DEPLOY_DIR" ]; then
+              git clone https://github.com/kripto-geek/kadio.git $DEPLOY_DIR
+            else
+              cd $DEPLOY_DIR && git pull origin main
+            fi
+            cd $DEPLOY_DIR
+            # Update the deployment manifest with the new image tag (commit SHA)
+            sed -i "s|krgaurav01/devopsified:.*|krgaurav01/devopsified:${{ github.sha }}|g" deployment.yaml
+            # Apply the updated deployment manifest to your Kubernetes cluster
+            kubectl apply -f deployment.yaml
